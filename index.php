@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-// Cek login dan role
+
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'Warga') {
     header("Location: login.php");
     exit();

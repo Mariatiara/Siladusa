@@ -1,3 +1,55 @@
+<?php
+include 'db.php';
+
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+$user_id = $_SESSION['user_id'];
+
+$aduan = [];
+
+if (isset($_GET['aduan_id'])) {
+    $aduan_id = $_GET['aduan_id'];
+    $sql = "SELECT * FROM tbl_aduan WHERE aduan_id = $aduan_id AND user_id = $user_id";
+    $result = $conn->query($sql);
+    if ($result && $result->num_rows > 0) {
+        $aduan = $result->fetch_assoc();
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_aduan'])) {
+    $aduan_id = $_POST['aduan_id'];
+    $judul_aduan = $_POST['judul_aduan'];
+    $deskripsi_aduan = $_POST['deskripsi_aduan'];
+    $kategori_id = $_POST['kategori_id'];
+    $lokasi_aduan = $_POST['lokasi_aduan'];
+    $tanggal_kejadian = $_POST['tanggal_kejadian'];
+    $lampiran = $_FILES['lampiran']['name'];
+
+    if ($lampiran) {
+        $target_dir = "uploads/";
+        $target_file = $target_dir . basename($_FILES["lampiran"]["name"]);
+        move_uploaded_file($_FILES["lampiran"]["tmp_name"], $target_file);
+        $sql = "UPDATE tbl_aduan SET judul_aduan = '$judul_aduan', deskripsi_aduan = '$deskripsi_aduan', kategori_id = '$kategori_id', lokasi_aduan = '$lokasi_aduan', tanggal_kejadian = '$tanggal_kejadian', lampiran = '$lampiran' WHERE aduan_id = $aduan_id AND user_id = $user_id";
+    } else {
+        $sql = "UPDATE tbl_aduan SET judul_aduan = '$judul_aduan', deskripsi_aduan = '$deskripsi_aduan', kategori_id = '$kategori_id', lokasi_aduan = '$lokasi_aduan', tanggal_kejadian = '$tanggal_kejadian' WHERE aduan_id = $aduan_id AND user_id = $user_id";
+    }
+
+    if ($conn->query($sql) === TRUE) {
+        $notif_message = "Aduan berhasil diperbarui!";
+        $notif_class = "success";
+    } else {
+        $notif_message = "Error: " . $conn->error;
+        $notif_class = "error";
+    }
+}
+
+$sql_kategori = "SELECT * FROM tbl_kategori_aduan";
+$result_kategori = $conn->query($sql_kategori);
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
